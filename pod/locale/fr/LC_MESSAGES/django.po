@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Pod\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-27 15:26+0000\n"
+"POT-Creation-Date: 2020-11-12 16:24+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -194,10 +194,10 @@ msgid "Please provide a valid value for this field"
 msgstr "Veuillez renseigner une valeur valide pour ce champ"
 
 #: pod/authentication/templates/userpicture/userpicture.html:56
-#: pod/bbb/templates/bbb/list_meeting.html:44
+#: pod/bbb/templates/bbb/list_meeting.html:44 pod/main/templates/base.html:115
 #: pod/main/templates/navbar_collapse.html:43
 #: pod/main/templates/navbar_collapse.html:66
-#: pod/main/templates/navbar_collapse.html:99
+#: pod/main/templates/navbar_collapse.html:100
 #: pod/podfile/templates/podfile/home_content.html:60
 #: pod/podfile/templates/podfile/home_content.html:98
 #: pod/recorder/templates/recorder/claim_record.html:49
@@ -2836,7 +2836,7 @@ msgstr "Partager"
 msgid "Share on"
 msgstr "Partager sur"
 
-#: pod/main/templates/aside.html:20 pod/main/templates/aside.html:25
+#: pod/main/templates/aside.html:21 pod/main/templates/aside.html:27
 #: pod/video/forms.py:134 pod/video/models.py:444 pod/video/models.py:522
 #: pod/video/templates/videos/filter_aside.html:56
 #: pod/video/templates/videos/video-info.html:90
@@ -2850,9 +2850,17 @@ msgstr "Disciplines"
 msgid "Tags"
 msgstr "Mots clés"
 
+#: pod/main/templates/base.html:68
+msgid "breadcrumb"
+msgstr "Fil d’Ariane"
+
 #: pod/main/templates/base.html:71
 msgid "Home"
 msgstr "Accueil"
+
+#: pod/main/templates/base.html:77
+msgid "Toggle side Menu"
+msgstr "Afficher/masquer le menu latéral"
 
 #: pod/main/templates/contact_us.html:8 pod/main/templates/contact_us.html:12
 #: pod/main/templates/contact_us.html:17 pod/main/templates/maintenance.html:15
@@ -2951,6 +2959,8 @@ msgid "Types"
 msgstr "Types"
 
 #: pod/main/templates/navbar.html:53 pod/main/templates/navbar.html:55
+#: pod/main/templates/navbar_collapse.html:85
+#: pod/main/templates/navbar_collapse.html:86
 #: pod/video/templates/videos/filter_aside.html:15 pod/video_search/forms.py:8
 #: pod/video_search/templates/search/search.html:8
 #: pod/video_search/templates/search/search.html:17
