@@ -70,3 +70,33 @@ jobs:
         run: |
           coverage run --source='.' manage.py test -v 3 --settings=pod.main.test_settings
           coveralls  --service=github
+
+      ## Start Accessibility tests with pa11y ##
+
+      - name: Install pa11y-ci dependencies.
+        run: sudo npm install -g pa11y-ci
+
+      - name: Run pa11y-ci.
+        run: |
+          python3 manage.py runserver localhost:8080 --insecure
+          npm run pa11y-ci 2>&1 | tee pa11y_output.txt
+
+      - name: Read pa11y_output file.
+        id: pa11y_output
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: ./pa11y_output.txt
+
+      - name: Comment on pull request.
+        uses: thollander/actions-comment-pull-request@master
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: '<details><summary>Pa11y testing results</summary>
+```${{ steps.pa11y_output.outputs.content }}```
+</details>'
+
+      - name: Check for pa11y failures.
+        if: contains(steps.pa11y_output.outputs.content, 'errno 2')
+        run: |
+          echo "::error::The site is failing accessibility tests. Please review the comment in the pull request or the pa11y-ci step in the workflow for details."
+          exit 1
