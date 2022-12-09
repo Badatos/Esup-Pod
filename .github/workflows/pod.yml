@@ -78,6 +78,7 @@ jobs:
 
       - name: Run pa11y-ci.
         run: |
+          make createDB
           python3 manage.py runserver localhost:8080 --insecure &
           npm run pa11y-ci 2>&1 | tee pa11y_output.txt
 
