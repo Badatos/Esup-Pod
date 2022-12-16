@@ -75,7 +75,8 @@ jobs:
 
       - name: Install pa11y-ci dependencies.
         if: matrix.python-version == 3.9
-        run: sudo npm install -g hollandjg/pa11y-ci/#77922af92edcbf882b50558da4d4481230412cfc
+        run: sudo npm install -g https://github.com/hollandjg/pa11y-ci/tree/feat-add-debug-option
+
 
       - name: Run pa11y-ci.
         if: matrix.python-version == 3.9
