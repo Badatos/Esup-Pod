@@ -76,9 +76,10 @@ jobs:
       - name: Install pa11y-ci dependencies.
         if: matrix.python-version == 3.9
         run: |
-          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
-          git config --global url."https://github.com/".insteadOf git@github.com:
-          git config --global url."https://".insteadOf ssh://
+          sudo git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+          sudo git config --global url."https://github.com/".insteadOf git@github.com:
+          sudo git config --global url."https://".insteadOf git://
+          sudo git config --global url."https://".insteadOf ssh://
           sudo npm install -g https://github.com/hollandjg/pa11y-ci/tree/feat-add-debug-option
 
 
