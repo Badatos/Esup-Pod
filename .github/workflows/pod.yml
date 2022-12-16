@@ -75,13 +75,14 @@ jobs:
 
       - name: Install pa11y-ci dependencies.
         if: matrix.python-version == 3.9
-        run: sudo npm install -g pa11y-ci
+        run: sudo npm install -g hollandjg/pa11y-ci/#77922af92edcbf882b50558da4d4481230412cfc
 
       - name: Run pa11y-ci.
         if: matrix.python-version == 3.9
+        # tee reads `stdin` and writes it to both `stdout` and a file
         run: |
           python3 manage.py runserver localhost:8080 --insecure &
-          sleep 20 ; pa11y-ci 2>&1 | tee pa11y_output.txt
+          sleep 20 ; pa11y-ci -d 2>&1 | tee pa11y_output.txt
 
       - name: Read pa11y_output file.
         id: pa11y_output
