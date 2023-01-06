@@ -74,18 +74,9 @@ jobs:
 
       ## Start Accessibility tests with pa11y ##
 
-      - name: Use secret ssh key to connect to Badatos/pa11y-ci
-        if: matrix.python-version == 3.9
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       - name: Install pa11y-ci dependencies.
         if: matrix.python-version == 3.9
-        env:
-          MY_SECRET: ${{secrets.SSH_PRIVATE_KEY}}
         run: |
-          # sudo echo "$MY_SECRET" >> /root/.ssh/id_rsa
           npm install -g Badatos/pa11y-ci
 
       - name: Run pa11y-ci.
