@@ -73,7 +73,7 @@ jobs:
 
       ## Start Accessibility tests with pa11y ##
 
-      - uses: webfactory/ssh-agent@v0.2.0
+      - uses: webfactory/ssh-agent@v0.7.0
         with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
