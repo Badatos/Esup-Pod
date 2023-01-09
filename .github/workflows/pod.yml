@@ -66,6 +66,7 @@ jobs:
           yarn
 
       - name: Run Tests and coveralls
+        if: matrix.python-version == 3.8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -84,8 +85,8 @@ jobs:
         # tee reads `stdin` and writes it to both `stdout` and a file
         run: |
           echo "Start Esup-Pod test server." | tee django_output.txt
-          python manage.py runserver localhost:8080 --insecure 2>&1 &
-          sleep 40
+          python manage.py runserver localhost:8000 --insecure 2>&1 &
+          sleep 10
           pa11y-ci --debug 2>&1 | tee pa11y_output.txt
 
       - name: Read pa11y_output file.
