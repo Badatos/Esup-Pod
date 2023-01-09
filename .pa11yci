@@ -3,8 +3,10 @@
         "timeout": 35000,
         "viewport": {
             "width": 320,
-            "height": 480
-        }
+            "height": 480,
+            "isMobile": true
+        },
+        "debug": true
     },
     "urls": [
         "http://localhost:8080/",

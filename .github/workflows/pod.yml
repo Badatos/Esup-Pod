@@ -85,6 +85,7 @@ jobs:
         run: |
           python3 manage.py runserver localhost:8080 --insecure > django_output.txt &
           sleep 40 ; pa11y-ci --debug 2>&1 | tee pa11y_output.txt
+          cat django_output.txt
 
       - name: Read pa11y_output file.
         id: pa11y_output
@@ -92,13 +93,6 @@ jobs:
         uses: juliangruber/read-file-action@v1
         with:
           path: ./pa11y_output.txt
-
-      - name: Read django_output file.
-        id: django_output
-        if: matrix.python-version == 3.9
-        uses: juliangruber/read-file-action@v1
-        with:
-          path: ./django_output.txt
 
       - name: Comment on pull request.
         if: matrix.python-version == 3.9
