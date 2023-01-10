@@ -66,7 +66,6 @@ jobs:
           yarn
 
       - name: Run Tests and coveralls
-        if: matrix.python-version == 3.8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -118,7 +117,7 @@ ${{ steps.pa11y_output.outputs.content }}```
 
 </details>'
       - name: Check for pa11y failures.
-        if: contains(steps.pa11y_output.outputs.content, 'errno 2')
+        if: contains(steps.pa11y_output.outputs.content, 'Errors in http://')
         run: |
           echo "::error::The site is failing accessibility tests. Please review the comment in the pull request or the pa11y-ci step in the workflow for details."
           exit 1
