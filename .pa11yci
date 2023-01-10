@@ -1,14 +1,16 @@
 {
     "defaults": {
-        "timeout": 50000,
+        "timeout": 60000,
         "viewport": {
             "width": 320,
             "height": 480,
             "isMobile": true
         },
+        "concurrency": 2,
         "debug": true
     },
     "urls": [
-        "http://localhost:8080/"
+        "http://localhost:8080/",
+        "http://localhost:8080/authentication_login"
     ]
 }
