@@ -1,6 +1,6 @@
 {
     "defaults": {
-        "timeout": 60000,
+        "timeout": 100000,
         "viewport": {
             "width": 320,
             "height": 480,
