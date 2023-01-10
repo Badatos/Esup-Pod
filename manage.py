@@ -36,4 +36,5 @@ if __name__ == "__main__":
         #        "forget to activate a virtual environment?"
         #    )
         raise
+    sys.stdout.write("Execute Esup-pod from command line with [%s] " % sys.argv)
     execute_from_command_line(sys.argv)
