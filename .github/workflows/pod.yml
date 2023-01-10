@@ -78,7 +78,7 @@ jobs:
       - name: Install pa11y-ci dependencies.
         if: matrix.python-version == 3.9
         run: |
-          npm install -g pa11y-ci
+          npm install -g Badatos/pa11y-ci
 
       - name: Run Django test server
         if: matrix.python-version == 3.9
@@ -111,7 +111,9 @@ jobs:
           message: '<details><summary>Pa11y testing results</summary>
 
 
-```${{ steps.pa11y_output.outputs.content }}```
+```
+
+${{ steps.pa11y_output.outputs.content }}```
 
 
 </details>'
