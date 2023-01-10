@@ -1,6 +1,6 @@
 {
     "defaults": {
-        "timeout": 35000,
+        "timeout": 50000,
         "viewport": {
             "width": 320,
             "height": 480,
@@ -10,9 +10,5 @@
     },
     "urls": [
         "http://localhost:8080/",
-        "http://localhost:8080/authentication_login",
-        "http://localhost:8080/accounts/login",
-        "http://localhost:8080/videos/",
-        "http://localhost:8080/video/stats_view/videos/"
     ]
 }

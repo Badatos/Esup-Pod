@@ -8,7 +8,6 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/wsgi/
 """
 
 import os
-import sys
 from django.core.wsgi import get_wsgi_application
 from django.conf import settings
 
@@ -17,8 +16,5 @@ proxy_host = getattr(settings, "PROXY_HOST", None)
 proxy_port = getattr(settings, "PROXY_PORT", None)
 if proxy_host and proxy_port:
     os.environ["http_proxy"] = os.environ["https_proxy"] = f"{proxy_host}:{proxy_port}"
-
-sys.stdout.write(
-    "launching Pod WSGI app with [%s]\n" % os.environ["DJANGO_SETTINGS_MODULE"])
 
 application = get_wsgi_application()

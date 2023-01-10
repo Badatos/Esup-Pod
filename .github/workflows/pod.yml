@@ -26,7 +26,6 @@ jobs:
           sudo sysctl -w vm.max_map_count=262144
 
       - name: Set up Python ${{ matrix.python-version }}
-        id: pysetup
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -84,7 +83,7 @@ jobs:
       - name: Run Django test server
         if: matrix.python-version == 3.9
         env:
-          PYTHONUNBUFFERED: 0
+          PYTHONUNBUFFERED: 1
         run: |
           python manage.py loaddata pod/video/fixtures/initial_data.json --settings=pod.main.test_settings
           python manage.py loaddata pod/main/fixtures/initial_data.json --settings=pod.main.test_settings
@@ -95,8 +94,7 @@ jobs:
       - name: wget localhost
         if: matrix.python-version == 3.9
         run: |
-          wget http://localhost:8080/ 2>&1
-          cat index.html >> django_output.txt
+          wget http://localhost:8080/
 
       - name: Run pa11y-ci.
         if: matrix.python-version == 3.9
