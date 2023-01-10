@@ -83,14 +83,16 @@ jobs:
 
       - name: Run Django test server
         if: matrix.python-version == 3.9
-        # tee reads `stdin` and writes it to both `stdout` and a file
+        env:
+          PYTHONUNBUFFERED: 0
         run: |
+          python manage.py loaddata pod/video/fixtures/initial_data.json
+          python manage.py loaddata pod/main/fixtures/initial_data.json
           echo "Start Esup-Pod test server." | tee django_output.txt
           python manage.py runserver localhost:8080 --insecure &
 
       - name: wget localhost
         if: matrix.python-version == 3.9
-        # tee reads `stdin` and writes it to both `stdout` and a file
         run: |
           sleep 5
           wget http://localhost:8080/
