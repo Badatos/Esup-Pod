@@ -86,16 +86,16 @@ jobs:
         env:
           PYTHONUNBUFFERED: 0
         run: |
-          python manage.py loaddata pod/video/fixtures/initial_data.json
-          python manage.py loaddata pod/main/fixtures/initial_data.json
+          python manage.py loaddata pod/video/fixtures/initial_data.json --settings=pod.main.test_settings
+          python manage.py loaddata pod/main/fixtures/initial_data.json --settings=pod.main.test_settings
           echo "Start Esup-Pod test server." | tee django_output.txt
-          python manage.py runserver localhost:8080 --insecure &
+          python manage.py runserver 127.0.0.1:8080 --insecure --settings=pod.main.test_settings &
 
       - name: wget localhost
         if: matrix.python-version == 3.9
         run: |
           sleep 5
-          wget http://localhost:8080/
+          wget http://127.0.0.1:8080/
           cat index.html >> django_output.txt
 
       - name: Run pa11y-ci.
