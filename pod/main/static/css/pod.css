@@ -1,5 +1,8 @@
 /*** Esup Pod main CSS ***/
 
+/* Just for a test} */
+body{background-color: pink}
+
 :root {
   /* COMMON COLORS */
   --color-black: #000;
