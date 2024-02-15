@@ -20,12 +20,14 @@ from pod.main.views import (
     robots_txt,
     info_pod,
     userpicture,
+    set_notifications,
 )
 from pod.main.rest_router import urlpatterns as rest_urlpatterns
 
 USE_CAS = getattr(settings, "USE_CAS", False)
 USE_SHIB = getattr(settings, "USE_SHIB", False)
 USE_OIDC = getattr(settings, "USE_OIDC", False)
+USE_NOTIFICATIONS = getattr(settings, "USE_NOTIFICATIONS", True)
 
 if USE_CAS:
     from cas import views as cas_views
@@ -68,6 +70,7 @@ urlpatterns = [
     url(r"^accounts/change-password/$", auth_views.PasswordChangeView.as_view()),
     url(r"^accounts/reset-password/$", auth_views.PasswordResetView.as_view()),
     url(r"^accounts/userpicture/$", userpicture, name="userpicture"),
+    url(r"^accounts/set-notifications/$", set_notifications, name="set_notifications"),
     # rest framework
     url(r"^api-auth/", include("rest_framework.urls")),
     url(r"^rest/", include(rest_urlpatterns)),
@@ -79,7 +82,18 @@ urlpatterns = [
     url(r"^custom/", include("pod.custom.urls")),
     # cut
     url(r"^cut/", include("pod.cut.urls")),
+    # pwa
+    url("", include("pwa.urls")),
+    # dressing
+    path("dressing/", include("pod.dressing.urls", namespace="dressing")),
 ]
+
+# WEBPUSH
+if USE_NOTIFICATIONS:
+    urlpatterns += [
+        # webpush
+        url(r"^webpush/", include("webpush.urls")),
+    ]
 
 # CAS
 if USE_CAS:
@@ -94,6 +108,13 @@ if USE_OIDC:
     urlpatterns += [
         url(r"^oidc/", include("mozilla_django_oidc.urls")),
     ]
+
+# PWA
+urlpatterns += [
+    path(
+        "pwa/", include("pod.progressive_web_app.urls", namespace="progressive_web_app")
+    ),
+]
 
 # BBB: TODO REPLACE BBB BY MEETING
 if getattr(settings, "USE_MEETING", False):

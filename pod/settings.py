@@ -3,6 +3,7 @@ Django global settings for pod_project.
 
 Django version: 3.2.
 """
+
 import os
 import importlib.util
 
@@ -12,7 +13,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 ##
 # Version of the project
 #
-VERSION = "3.4.0"
+VERSION = "3.5.0"
 
 ##
 # Installed applications list
@@ -44,6 +45,8 @@ INSTALLED_APPS = [
     "mozilla_django_oidc",
     "honeypot",
     "lti_provider",
+    "pwa",
+    "webpush",
     # Pod Applications
     "pod.main",
     "django.contrib.admin",  # put it here for template override
@@ -64,6 +67,8 @@ INSTALLED_APPS = [
     "pod.xapi",
     "pod.video_encode_transcript",
     "pod.import_video",
+    "pod.progressive_web_app",
+    "pod.dressing",
     "pod.custom",
 ]
 
@@ -114,7 +119,7 @@ TEMPLATES = [
                 # Local contexts
                 "pod.main.context_processors.context_settings",
                 "pod.main.context_processors.context_footer",
-                "pod.video.context_processors.context_navbar",
+                "pod.video.context_processors.context_video_data",
                 "pod.video.context_processors.context_video_settings",
                 "pod.authentication.context_processors.context_authentication_settings",
                 "pod.recorder.context_processors.context_recorder_settings",
@@ -381,6 +386,7 @@ MODELTRANSLATION_FALLBACK_LANGUAGES = ("fr", "en")
 #     'flatpages': 'pod.db_migrations'
 # }
 
+
 ##
 # Applications settings (and settings locale if any)
 #
@@ -464,3 +470,11 @@ if locals()["DEBUG"] is True and importlib.util.find_spec("debug_toolbar") is no
 
     def show_toolbar(request):
         return True
+
+
+# Needed to start Esup-Pod with auto-signed https cert (with `make starts`)
+if (
+    locals()["DEBUG"] is True
+    and importlib.util.find_spec("django_extensions") is not None
+):
+    INSTALLED_APPS.append("django_extensions")

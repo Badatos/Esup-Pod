@@ -1,4 +1,5 @@
 """Admin pages for Esup-Pod Video items."""
+
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import widgets
@@ -131,7 +132,7 @@ class VideoAdmin(admin.ModelAdmin):
         "is_draft",
         "encoding_in_progress",
         EncodedFilter,
-        "owner",
+        # "owner",
     )
     autocomplete_fields = [
         "owner",

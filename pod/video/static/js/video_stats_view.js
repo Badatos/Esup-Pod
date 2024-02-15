@@ -1,3 +1,8 @@
+/**
+ * @file Esup-Pod video stats scripts
+ * @since 2.5.0
+ */
+
 function linkedCell(cellValue, options, rowObject) {
   return (
     "<a href='" +
@@ -9,6 +14,7 @@ function linkedCell(cellValue, options, rowObject) {
     "</a>"
   );
 }
+
 $(() => {
   let data_url = window.location.href;
   $("#grid").jqGrid({
@@ -99,13 +105,16 @@ $(() => {
     pager: "#pager",
     sortorder: "asc",
     beforeProcessing: function (data) {
-      // Set min date
-      let min_date = data.filter((obj) => {
-        return obj.min_date != undefined;
-      });
-      // remove date_min in data
-      data.pop();
-      document.querySelector("#jsperiode").min = min_date[0].min_date;
+      // Avoid "data.filter is not a function" error (if change number of lines or page)
+      try {
+        // Set min date
+        let min_date = data.filter((obj) => {
+          return obj.min_date != undefined;
+        });
+        // remove date_min in data
+        data.pop();
+        document.getElementById("jsperiode").min = min_date[0].min_date;
+      } catch (uselesserr) {}
     },
     postData: {
       csrfmiddlewaretoken: $("[name=csrfmiddlewaretoken]").val(),
@@ -113,9 +122,9 @@ $(() => {
   });
   let today = new Date().toISOString().split("T")[0];
   $("#jsperiode").val(today); // set date input value to today
-  document.querySelector("#jsperiode").max = today;
+  document.getElementById("jsperiode").max = today;
 
-  $("#jsperiode").on("change paste keyup", function (e) {
+  $("#jsperiode").on("change paste keyup", function () {
     if ($(this).val() != undefined && $(this).val().trim() !== "") {
       try {
         let data = { periode: $(this).val() };

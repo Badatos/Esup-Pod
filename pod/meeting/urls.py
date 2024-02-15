@@ -1,4 +1,5 @@
 """URLs for Meeting module."""
+
 from django.urls import path
 
 from . import views
@@ -38,6 +39,12 @@ if not views.MEETING_DISABLE_RECORD:
             views.delete_internal_recording,
             name="delete_internal_recording",
         ),
+        path(
+            "internal_recording/<slug:meeting_id>/<slug:recording_id>/",
+            views.internal_recording,
+            name="internal_recording",
+        ),
+        path("recording_ready/", views.recording_ready, name="recording_ready"),
     ]
 
 urlpatterns += [

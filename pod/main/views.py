@@ -34,7 +34,7 @@ from django.http import JsonResponse
 from wsgiref.util import FileWrapper
 from django.db.models import Q, Count
 from pod.video.models import Video, remove_accents
-from pod.authentication.forms import FrontOwnerForm
+from pod.authentication.forms import FrontOwnerForm, SetNotificationForm
 from django.db.models import Sum
 import os
 import mimetypes
@@ -101,6 +101,7 @@ def in_maintenance():
 
 @csrf_protect
 def download_file(request):
+    """Direct download of requested file."""
     if request.POST and request.POST.get("filename"):
         filename = os.path.join(settings.MEDIA_ROOT, request.POST["filename"])
         wrapper = FileWrapper(open(filename, "rb"))
@@ -342,6 +343,7 @@ def user_autocomplete(request):
 
 
 def maintenance(request):
+    """Render the maintenance page with configured text."""
     text = Configuration.objects.get(key="maintenance_text_disabled").value
     return render(request, "maintenance.html", {"text": text})
 
@@ -375,6 +377,7 @@ def info_pod(request):
 @csrf_protect
 @login_required(redirect_field_name="referrer")
 def userpicture(request):
+    """Render the user picture."""
     frontOwnerForm = FrontOwnerForm(instance=request.user.owner)
 
     if request.method == "POST":
@@ -395,3 +398,31 @@ def userpicture(request):
         "userpicture/userpicture.html",
         {"frontOwnerForm": frontOwnerForm},
     )
+
+
+@csrf_protect
+@login_required(redirect_field_name="referrer")
+def set_notifications(request):
+    """Set 'accepts_notifications' attribute on owner instance."""
+    setNotificationForm = SetNotificationForm(instance=request.user.owner)
+
+    if request.method == "POST":
+        setNotificationForm = SetNotificationForm(
+            request.POST, instance=request.user.owner
+        )
+        if setNotificationForm.is_valid():
+            setNotificationForm.save()
+            return JsonResponse(
+                {
+                    "success": True,
+                    "user_accepts_notifications": request.user.owner.accepts_notifications,
+                }
+            )
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                _("One or more errors have been found in the form."),
+            )
+
+    return JsonResponse({"success": False})

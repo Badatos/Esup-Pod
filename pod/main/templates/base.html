@@ -1,4 +1,6 @@
 {% load static i18n custom_tags %}
+{% load pwa %}
+{% load webpush_notifications %}
 {% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
@@ -18,7 +20,7 @@
     <meta property="og:site_name" content="{{ TITLE_SITE }}">
   {% endblock %}
   {% if FAVICON %}
-    <link rel="shortcut icon" href="{% static FAVICON %}?ver={{VERSION}}" sizes="any" >
+    <link rel="shortcut icon" href="{% static FAVICON %}?ver={{VERSION}}" sizes="any">
   {% endif %}
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}?ver={{VERSION}}" crossorigin="anonymous">
@@ -37,16 +39,22 @@
   {% if SHOW_EVENTS_ON_HOMEPAGE and "live" in THIRD_PARTY_APPS %}
     <link href="{% static 'css/event.css' %}?ver={{ VERSION }}" rel="stylesheet">
   {% endif %}
-  <!-- more styles for each App -->
-  {% block more_style %}
-  {% endblock more_style %}
-  <title>{{ TITLE_SITE }} - {% block page_title %}{{page_title|striptags|capfirst}}{% endblock %}</title>  <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
-  {% block page_extra_head %}
-  {% endblock %}
+
+  <title>{{ TITLE_SITE }} - {% block page_title %}{{page_title|striptags|capfirst}}{% endblock %}</title>
+
+  <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+  <script id="jsi18n" src="{% url 'javascript-catalog' %}"></script>
+
+  {% block page_extra_head %}{% endblock %}
+
   {% if request.GET.is_iframe %}
     <link rel="stylesheet" href="{% static 'css/iframe.css' %}?ver={{VERSION}}" media="screen">
   {% endif %}
+  {% progressive_web_app_meta %}
   {% endspaceless %}
+  {% if USE_NOTIFICATIONS %}
+    {% webpush_header %}
+  {% endif %}
 
 </head>
 
@@ -71,8 +79,13 @@
           {% if not request.GET.is_iframe %}
             <div class="pod-aside-collapse" id="collapse-button">
               {% block collapse_page_aside %}
-                <a class="btn btn-outline-primary collapseAside pod-aside-collapse__button" data-bs-toggle="collapse" href="#collapseAside" role="button" aria-expanded="false" aria-controls="collapseAside" aria-label="{% trans 'Toggle side Menu' %}">
-                  <i class="bi bi-three-dots-vertical"></i>
+                <a role="button" href="#collapseAside"
+                class="btn btn-outline-primary collapseAside pod-aside-collapse__button"
+                data-bs-toggle="collapse"
+                aria-expanded="false" aria-controls="collapseAside"
+                aria-label="{% trans 'Side menu' %}" data-pod-tooltip="true"
+                title="{% trans 'Toggle side menu' %}">
+                  <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
                 </a>
               {% endblock collapse_page_aside %}
             </div>
@@ -97,23 +110,22 @@
               </ol>
             </nav>
           {% endif %}
-          <!-- contenu page statique -->
-          <div class="pod-first-content">
-            {% block main_page_title %}
-              {% if page_title %}
-                <h1 class="page_title">{{page_title|capfirst}}</h1>
+          <div class="container">
+            <div class="pod-first-content">
+              {% block main_page_title %}
+                {% if page_title %}
+                  <h1 class="page_title">{{page_title|capfirst}}</h1>
+                {% endif %}
+              {% endblock main_page_title %}
+              {% block page_content %}{% endblock page_content %}
+            </div>
+            {% if request.path == "/" %}
+              {% if SHOW_EVENTS_ON_HOMEPAGE and "live" in THIRD_PARTY_APPS %}
+                {% include "live/events_next.html" %}
               {% endif %}
-            {% endblock main_page_title %}
-            {% block page_content %}
-            {% endblock page_content %}
-          </div>
-          <!-- fin contenu page statique -->
-          {% if request.path == "/" %}
-            {% if SHOW_EVENTS_ON_HOMEPAGE and "live" in THIRD_PARTY_APPS %}
-              {% include "live/events_next.html" %}
+              {% include "videos/last_videos.html" %}
             {% endif %}
-            {% include "videos/last_videos.html" %}
-          {% endif %}
+          </div>
         </div>
         {% if not request.GET.is_iframe %}
           <aside class="pod-aside collapse" id="collapseAside">
@@ -122,9 +134,12 @@
             {% endblock page_aside %}
           </aside>
         {% endif %}
-      </div> <!-- fin div pod-grid-content -->
+      </div>
     </main>
-  </div> <!-- fin container -->
+    {% if USE_NOTIFICATIONS %}
+      {% include "notification_toast.html" %}
+    {% endif %}
+  </div>
   {% endblock content %}
   {% if not request.GET.is_iframe %}
     <footer class="container-fluid pod-footer-container">
@@ -154,7 +169,7 @@
             <img src="{% static 'img/cookie.svg' %}" alt="" width="50">
             <span class="mt-2">{% trans 'We use third party cookies to personalize content, manage session and analyze site traffic.' %}</span>
             {% if COOKIE_LEARN_MORE != "" %}
-              <a class="d-flex align-items-center" href="{{COOKIE_LEARN_MORE}}">{% trans 'Learn more' %}<i class="bi bi-caret-right ms-2"></i></a>
+              <a class="d-flex align-items-center" href="{{COOKIE_LEARN_MORE}}">{% trans 'Learn more' %}<i class="bi bi-caret-right ms-2" aria-hidden="true"></i></a>
             {% endif %}
             <button class="btn btn-dark mt-3 px-4" type="button" id='okcookie'>{% trans 'I understand' %}</button>
           </div>
@@ -165,7 +180,6 @@
   <!-- Javascript migration from header to footer-->
   <!-- except for jquery, to do later ! -->
   <script src="{% static 'js-cookie/dist/js.cookie.min.js' %}?ver={{VERSION}}"></script>
-  <script src="{% url 'javascript-catalog' %}"></script>
   <!-- JS -->
   <script src="{% static 'bootstrap/dist/js/bootstrap.bundle.min.js' %}?ver={{VERSION}}"></script>
 
@@ -214,6 +228,7 @@
       // Set the body data-theme attribute to match the local storage item
       document.documentElement.dataset.theme = currentTheme?currentTheme:"light";
       document.documentElement.dataset.bsTheme = currentTheme?currentTheme:"light";
+      document.documentElement.dataset.colorScheme = currentTheme?currentTheme:"light";
       // If the current theme is dark, check the theme toggle
       if (currentTheme === "dark") {
         themeToggle.checked = true;
@@ -224,10 +239,12 @@
         if (e.target.checked) {
           document.documentElement.dataset.theme = "dark";
           document.documentElement.dataset.bsTheme = "dark";
+          document.documentElement.dataset.colorScheme = "dark";
           localStorage.setItem("theme", "dark");
         } else {
           document.documentElement.dataset.theme = "light";
           document.documentElement.dataset.bsTheme = "light";
+          document.documentElement.dataset.colorScheme = "light";
           localStorage.setItem("theme", "light");
         }
       }
@@ -266,16 +283,16 @@
       dyslexiaToggle.addEventListener("change", switchDyslexia, false);
     </script>
   {% endif %}
-  {% if DARKMODE_ENABLED == True or DYSLEXIAMODE_ENABLED == True %}
-    <script>
-      $(function () {
-        $('[data-bs-toggle="tooltip"]').tooltip()
-      })
-    </script>
-  {% endif %}
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      /* Enable Bootstrap tooltips */
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"], [data-pod-tooltip="true"]');
+      [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    }, false);
+  </script>
   {% if POST_FOOTER_TEMPLATE %}{% include POST_FOOTER_TEMPLATE %}{% endif %}
   {% if TRACKING_TEMPLATE %}{% include TRACKING_TEMPLATE %}{% endif %}
+  <script src="{% static 'js/pwa-installation.js' %}?ver={{VERSION}}"></script>
 </body>
-
 </html>
-

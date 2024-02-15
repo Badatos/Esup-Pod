@@ -60,6 +60,8 @@ HIDE_SHARE = getattr(django_settings, "HIDE_SHARE", False)
 
 HIDE_DISCIPLINES = getattr(django_settings, "HIDE_DISCIPLINES", False)
 
+HIDE_CURSUS = getattr(django_settings, "HIDE_CURSUS", False)
+
 HIDE_TYPES = getattr(django_settings, "HIDE_TYPES", False)
 
 USE_BBB = getattr(django_settings, "USE_BBB", False)
@@ -81,6 +83,7 @@ RESTRICT_EDIT_VIDEO_ACCESS_TO_STAFF_ONLY = getattr(
 RESTRICT_EDIT_MEETING_ACCESS_TO_STAFF_ONLY = getattr(
     django_settings, "RESTRICT_EDIT_MEETING_ACCESS_TO_STAFF_ONLY", False
 )
+USE_NOTIFICATIONS = getattr(django_settings, "USE_NOTIFICATIONS", True)
 
 
 def context_settings(request):
@@ -122,6 +125,7 @@ def context_settings(request):
     new_settings["HIDE_TAGS"] = HIDE_TAGS
     new_settings["HIDE_SHARE"] = HIDE_SHARE
     new_settings["HIDE_DISCIPLINES"] = HIDE_DISCIPLINES
+    new_settings["HIDE_CURSUS"] = HIDE_CURSUS
     new_settings["HIDE_TYPES"] = HIDE_TYPES
     new_settings["MAINTENANCE_REASON"] = maintenance_text_short
     new_settings["MAINTENANCE_MODE"] = maintenance_mode
@@ -135,12 +139,13 @@ def context_settings(request):
     new_settings["COOKIE_LEARN_MORE"] = COOKIE_LEARN_MORE
     new_settings["SHOW_EVENTS_ON_HOMEPAGE"] = SHOW_EVENTS_ON_HOMEPAGE
     new_settings["USE_MEETING"] = USE_MEETING
-    new_settings[
-        "RESTRICT_EDIT_VIDEO_ACCESS_TO_STAFF_ONLY"
-    ] = RESTRICT_EDIT_VIDEO_ACCESS_TO_STAFF_ONLY
-    new_settings[
-        "RESTRICT_EDIT_MEETING_ACCESS_TO_STAFF_ONLY"
-    ] = RESTRICT_EDIT_MEETING_ACCESS_TO_STAFF_ONLY
+    new_settings["RESTRICT_EDIT_VIDEO_ACCESS_TO_STAFF_ONLY"] = (
+        RESTRICT_EDIT_VIDEO_ACCESS_TO_STAFF_ONLY
+    )
+    new_settings["RESTRICT_EDIT_MEETING_ACCESS_TO_STAFF_ONLY"] = (
+        RESTRICT_EDIT_MEETING_ACCESS_TO_STAFF_ONLY
+    )
+    new_settings["USE_NOTIFICATIONS"] = USE_NOTIFICATIONS
     return new_settings
 
 

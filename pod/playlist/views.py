@@ -258,7 +258,11 @@ def render_playlist(
         },
     )
     in_favorites_playlist = playlist_url == request.path
-    if playlist.visibility == "protected" and playlist.owner != request.user:
+    if (
+        playlist.visibility == "protected"
+        and playlist.owner != request.user
+        and request.user not in get_additional_owners(playlist)
+    ):
         return toggle_render_playlist_user_has_right(
             request,
             playlist,
@@ -366,6 +370,11 @@ def handle_post_request_for_add_or_edit_function(request, playlist: Playlist) ->
         if playlist
         else PlaylistForm(request.POST)
     )
+    if playlist:
+        page_title = _("Edit the playlist “%(pname)s”") % {"pname": playlist.name}
+    else:
+        page_title = _("Add a playlist")
+
     if form.is_valid():
         new_playlist = form.save(commit=False) if playlist is None else playlist
         new_playlist.site = get_current_site(request)
@@ -379,8 +388,7 @@ def handle_post_request_for_add_or_edit_function(request, playlist: Playlist) ->
         new_playlist.additional_owners.clear()
         new_playlist.save()
         if request.POST.get("additional_owners"):
-            for o in request.POST.get("additional_owners"):
-                new_playlist.additional_owners.add(o)
+            new_playlist.additional_owners.set(request.POST.getlist("additional_owners"))
             new_playlist.save()
         if request.GET.get("next"):
             video_slug = request.GET.get("next").split("/")[2]
@@ -393,6 +401,12 @@ def handle_post_request_for_add_or_edit_function(request, playlist: Playlist) ->
             return redirect(request.GET.get("next"))
         return HttpResponseRedirect(
             reverse("playlist:content", kwargs={"slug": new_playlist.slug})
+        )
+    else:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            _("The data sent to create the playlist are invalid."),
         )
     return render(
         request,
@@ -415,7 +429,9 @@ def handle_get_request_for_add_or_edit_function(request, slug: str) -> None:
     playlist = get_object_or_404(Playlist, slug=slug) if slug else None
     if playlist:
         if (
-            request.user == playlist.owner or request.user.is_staff
+            request.user == playlist.owner
+            or request.user.is_staff
+            or request.user in get_additional_owners(playlist)
         ) and playlist.editable:
             form = PlaylistForm(instance=playlist)
             page_title = _("Edit the playlist") + f' "{playlist.name}"'
@@ -484,7 +500,11 @@ def favorites_save_reorganisation(request, slug: str):
 def start_playlist(request, slug, video=None):
     playlist = get_object_or_404(Playlist, slug=slug)
 
-    if playlist.visibility == "public" or playlist.owner == request.user:
+    if (
+        playlist.visibility == "public"
+        or playlist.owner == request.user
+        or request.user in get_additional_owners(playlist)
+    ):
         return redirect(get_link_to_start_playlist(request, playlist, video))
     elif playlist.visibility == "protected":
         if request.method == "POST":
@@ -533,20 +553,37 @@ def get_video(request: WSGIRequest, video_slug: str, playlist_slug: str) -> Json
             "playlist_in_get": playlist,
             "videos": videos,
         }
-        breadcrumbs = render_to_string(
-            "playlist/playlist_breadcrumbs.html", context, request
-        )
-        opengraph = render_to_string("videos/video_opengraph.html", context, request)
+        video_is_enrichment = True if video.get_default_version_link() else False
+        templates = {
+            "breadcrumbs": "playlist/playlist_breadcrumbs.html",
+            "opengraph": "videos/video_opengraph.html",
+            "more_script": "enrichment/video_enrichment_more_script.html",
+            "page_aside": (
+                "enrichment/video_enrichment_page_aside.html"
+                if video_is_enrichment
+                else "videos/video_page_aside.html"
+            ),
+            "page_content": (
+                "enrichment/video_enrichment_page_content.html"
+                if video_is_enrichment
+                else "videos/video_page_content.html"
+            ),
+            "page_title": (
+                "enrichment/video_enrichment_page_title.html"
+                if video_is_enrichment
+                else "videos/video_page_title.html"
+            ),
+        }
+        breadcrumbs = render_to_string(templates["breadcrumbs"], context, request)
+        opengraph = render_to_string(templates["opengraph"], context, request)
         more_script = '<div id="more-script">%s</div>' % render_to_string(
-            "videos/video_more_script.html", context, request
+            templates["more_script"], context, request
         )
-        page_aside = render_to_string("videos/video_page_aside.html", context, request)
-        page_content = render_to_string(
-            "videos/video_page_content.html", context, request
-        )
+        page_aside = render_to_string(templates["page_aside"], context, request)
+        page_content = render_to_string(templates["page_content"], context, request)
         page_title = "<title>%s - %s</title>" % (
             __TITLE_SITE__,
-            render_to_string("videos/video_page_title.html", context, request),
+            render_to_string(templates["page_title"], context, request),
         )
         response_data = {
             "breadcrumbs": breadcrumbs,
@@ -555,10 +592,11 @@ def get_video(request: WSGIRequest, video_slug: str, playlist_slug: str) -> Json
             "page_aside": page_aside,
             "page_content": page_content,
             "page_title": page_title,
+            "enrichment_is_on": video_is_enrichment,
         }
     else:
         response_data = {
             "error_type": 404,
-            "error_text": _("This video isn't present in this playlist."),
+            "error_text": _("This video isn’t present in this playlist."),
         }
     return JsonResponse(response_data)

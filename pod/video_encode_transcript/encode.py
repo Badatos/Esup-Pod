@@ -1,11 +1,14 @@
 """This module handles video encoding with CPU."""
 
 from django.conf import settings
+from webpush.models import PushInformation
+
 from pod.video.models import Video
 from .Encoding_video_model import Encoding_video_model
 from .encoding_studio import encode_video_studio
 
 from pod.cut.models import CutVideo
+from pod.dressing.models import Dressing
 from pod.main.tasks import task_start_encode, task_start_encode_studio
 from .utils import (
     change_encoding_step,
@@ -13,6 +16,7 @@ from .utils import (
     add_encoding_log,
     send_email,
     send_email_encoding,
+    send_notification_encoding,
     time_to_seconds,
 )
 import logging
@@ -23,7 +27,7 @@ __license__ = "LGPL v3"
 log = logging.getLogger(__name__)
 
 USE_TRANSCRIPTION = getattr(settings, "USE_TRANSCRIPTION", False)
-
+USE_NOTIFICATIONS = getattr(settings, "USE_NOTIFICATIONS", True)
 if USE_TRANSCRIPTION:
     from . import transcript
 
@@ -109,7 +113,7 @@ def encode_video(video_id):
     video_to_encode.save()
 
     if not check_file(video_to_encode.video.path):
-        msg = "Wrong file or path:" + "\n%s" % video_to_encode.video.path
+        msg = "Wrong file or path:\n%s" % video_to_encode.video.path
         add_encoding_log(video_id, msg)
         change_encoding_step(video_id, -1, msg)
         send_email(msg, video_id)
@@ -129,6 +133,7 @@ def encode_video(video_id):
             encoding_video.video_file,
             encoding_video.cutting_start,
             encoding_video.cutting_stop,
+            encoding_video.dressing,
         )
     else:
         encoding_video.start_encode()
@@ -148,19 +153,32 @@ def store_encoding_info(video_id, encoding_video):
 
 def get_encoding_video(video_to_encode):
     """Get the encoding video object from video."""
+    dressing = None
+    if Dressing.objects.filter(videos=video_to_encode).exists():
+        dressing = Dressing.objects.get(videos=video_to_encode)
+
     if CutVideo.objects.filter(video=video_to_encode).exists():
         cut = CutVideo.objects.get(video=video_to_encode)
         cut_start = time_to_seconds(cut.start)
         cut_end = time_to_seconds(cut.end)
         encoding_video = Encoding_video_model(
-            video_to_encode.id, video_to_encode.video.path, cut_start, cut_end
+            video_to_encode.id, video_to_encode.video.path, cut_start, cut_end, dressing
         )
         return encoding_video
-    return Encoding_video_model(video_to_encode.id, video_to_encode.video.path)
+
+    return Encoding_video_model(
+        video_to_encode.id, video_to_encode.video.path, 0, 0, dressing
+    )
 
 
 def end_of_encoding(video):
     """Send mail at the end of encoding, call transcription."""
+    if (
+        USE_NOTIFICATIONS
+        and video.owner.owner.accepts_notifications
+        and PushInformation.objects.filter(user=video.owner).exists()
+    ):
+        send_notification_encoding(video)
     if EMAIL_ON_ENCODING_COMPLETION:
         send_email_encoding(video)
 

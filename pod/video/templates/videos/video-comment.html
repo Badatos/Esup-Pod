@@ -11,16 +11,16 @@
       {% if is_auth %}
         {% if MAINTENANCE_MODE %}
           <div class="alert alert-warning">
-            {% trans "Sorry, you can't comment while the server is under maintenance." %}
+            {% trans "Sorry, you can’t comment while the server is under maintenance." %}
           </div>
         {% else %}
           <form class="add_comment add_parent_comment">
             <div class="form-wrapper form-group">
               <label class="comment_label" for="comment">{% trans "Your comment" %}</label>
-              <textarea class="form-control new_comment new_parent_comment" name="new_parent_comment" id="comment" placeholder='{% trans "Add a public comment" %}'></textarea>
-            </div>
-            <div class="add_comment_footer">
+              <div class="input-group">
+                <textarea class="form-control new_comment new_parent_comment" name="new_parent_comment" id="comment" placeholder='{% trans "Add a public comment" %}'></textarea>
                 <button type="submit" class="add_comment_btn btn btn-primary">{% trans "Comment!" %}</button>
+              </div>
             </div>
           </form>
         {% endif %}
