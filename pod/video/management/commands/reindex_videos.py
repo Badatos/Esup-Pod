@@ -46,7 +46,8 @@ class Command(BaseCommand):
 
         if dry_run:
             print(
-                "[DRY RUN] %i video(s) would have been reindexed." % (self.nb_reindexed)
+                "[DRY RUN] %i video(s) would have been reindexed."
+                % (self.nb_reindexed)
             )
         else:
             print("%i video(s) reindexed." % self.nb_reindexed)
