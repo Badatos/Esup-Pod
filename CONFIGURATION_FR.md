@@ -1067,7 +1067,7 @@ Mettre `USE_DRESSING` à True pour activer cette application.<br>
 
 ### Configuration de l’application duplicate
 
-Application Duplicate pour créer une copie du formulaire d’une vidéo existante<br>
+Application Duplicate pour créer une copie du formulaire d’une vidéo existante.<br>
 Mettre `USE_DUPLICATE` à True pour activer cette application.<br>
 
 * `USE_DUPLICATE`
@@ -1077,6 +1077,14 @@ Mettre `USE_DUPLICATE` à True pour activer cette application.<br>
 
 ### Configuration de l’application enrichment
 
+### Configuration de l’application hyperlinks
+
+Application hyperlinks permettant d'ajouter des liens à la vidéo.<br>
+Mettre `USE_HYPERLINKS` à True pour activer cette application.<br>
+
+* `USE_HYPERLINKS`
+  > valeur par défaut : `False`
+  >> Activation de hyperlinks.<br>
 
 ### Configuration de l’application Intervenant
 

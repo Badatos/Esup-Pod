@@ -1068,6 +1068,69 @@
                         "fr": "Configuration de l’application dressing"
                     }
                 },
+                "duplicate": {
+                    "description": {
+                        "en": [
+                            "Duplicate App to create a copy of the form of an existing video",
+                            "Set `USE_DUPLICATE` to True to activate this application."
+                        ],
+                        "fr": [
+                            "Application Duplicate pour créer une copie du formulaire d’une vidéo existante",
+                            "Mettre `USE_DUPLICATE` à True pour activer cette application."
+                        ]
+                    },
+                    "settings": {
+                        "USE_DUPLICATE": {
+                            "default_value": false,
+                            "description": {
+                                "en": [
+                                    "Activation of duplicate. Allows users to duplicate a video"
+                                ],
+                                "fr": [
+                                    "Activation de duplicate.",
+                                    "Permet aux utilisateurs de dupliquer une vidéo"
+                                ]
+                            },
+                            "pod_version_end": "",
+                            "pod_version_init": ""
+                        }
+                    },
+                    "title": {
+                        "en": "Duplicate application configuration",
+                        "fr": "Configuration de l’application duplicate"
+                    }
+                },
+                "hyperlinks": {
+                    "description": {
+                        "en": [
+                            "Hyperlinks application to add hyperlinks to video.",
+                            "Set `USE_HYPERLINKS` to True to activate this application."
+                        ],
+                        "fr": [
+                            "Application Liens permettant d'ajouter des liens à la vidéo.",
+                            "Mettre `USE_HYPERLINKS` à True pour activer cette application."
+                        ]
+                    },
+                    "settings": {
+                        "USE_HYPERLINKS": {
+                            "default_value": false,
+                            "description": {
+                                "en": [
+                                    "Activation of the Hyperlinks application"
+                                ],
+                                "fr": [
+                                    "Activation de l’application Liens"
+                                ]
+                            },
+                            "pod_version_end": "",
+                            "pod_version_init": ""
+                        }
+                    },
+                    "title": {
+                        "en": "Hyperlinks application configuration",
+                        "fr": "Configuration de l’application Liens"
+                    }
+                },
                 "enrichment": {
                     "description": {},
                     "settings": {},
@@ -1100,10 +1163,24 @@
                             },
                             "pod_version_end": "",
                             "pod_version_init": "3.8.0"
+                        },
+                        "REQUIRED_SPEAKER_FIRSTNAME": {
+                            "default_value": true,
+                            "description": {
+                                "en": [
+                                    "First name required in the speaker addition form"
+                                ],
+                                "fr": [
+                                    "Prénom obligatoire dans le formulaire d'ajout intervenant"
+                                ]
+                            },
+                            "pod_version_end": "",
+                            "pod_version_init": ""
                         }
+                        
                     },
                     "title": {
-                        "en": "Seaker application configuration",
+                        "en": "Speaker application configuration",
                         "fr": "Configuration de l’application Intervenant"
                     }
                 },
