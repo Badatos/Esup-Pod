@@ -1,6 +1,4 @@
-"""Esup-Pod Studio Recorder urls digest."""
-
-from django.urls import path, re_path
+from django.urls import re_path
 
 from pod.recorder.views import (
     digest_admin_ng_series,
@@ -27,8 +25,8 @@ urlpatterns = [
         digest_hosts_json,
         name="hosts_json",
     ),
-    path(
-        "capture-admin/agents/<path:name>/configuration",
+    re_path(
+        r"^capture-admin/agents/(?P<name>.+)/configuration$",
         digest_capture_admin_configuration,
         name="capture_admin_config",
     ),
@@ -47,8 +45,8 @@ urlpatterns = [
         digest_available,
         name="services_available",
     ),
-    path(
-        "presenter_post",
+    re_path(
+        r"^presenter_post$",
         digest_presenter_post,
         name="presenter_post",
     ),
@@ -67,33 +65,33 @@ urlpatterns = [
         digest_studio_static,
         name="studio_static",
     ),
-    path(
-        "ingest/createMediaPackage",
+    re_path(
+        r"^ingest/createMediaPackage$",
         digest_ingest_createMediaPackage,
         name="ingest_createMediaPackage",
     ),
-    path(
-        "ingest/addDCCatalog",
+    re_path(
+        r"^ingest/addDCCatalog$",
         digest_ingest_addDCCatalog,
         name="ingest_addDCCatalog",
     ),
-    path(
-        "ingest/addAttachment",
+    re_path(
+        r"^ingest/addAttachment$",
         digest_ingest_addAttachment,
         name="ingest_addAttachment",
     ),
-    path(
-        "ingest/addTrack",
+    re_path(
+        r"^ingest/addTrack$",
         digest_ingest_addTrack,
         name="ingest_addTrack",
     ),
-    path(
-        "ingest/addCatalog",
+    re_path(
+        r"^ingest/addCatalog$",
         digest_ingest_addCatalog,
         name="ingest_addCatalog",
     ),
-    path(
-        "ingest/ingest",
+    re_path(
+        r"^ingest/ingest$",
         digest_ingest_ingest,
         name="ingest_ingest",
     ),

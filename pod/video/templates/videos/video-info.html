@@ -1,5 +1,9 @@
-{% load i18n static thumbnail %}
-{% load video_tags playlist_stats favorites_playlist %}
+{% load i18n %}
+{% load static %}
+{% load thumbnail %}
+{% load video_tags %}
+{% load playlist_stats %}
+{% load favorites_playlist %}
 {% load speaker_template_tags %}
 
 <div class="video-info_duration-view-share">
@@ -71,19 +75,19 @@
   </div>
 </div>
 
-{% if video.description or video.tags or video.is_360 %}
+{% if video.description or tag_list or video.is_360 %}
   <div class="pod-info-video__summary my-3" id="summary">
     {% if video.is_360 %}
       <p class="alert alert-info" role="alert">{% trans 'This is a 360 degree video. To look around click and drag your mouse on the video.' %}</p>
     {% endif %}
-    {% if video.description or video.tags %}
+    {% if video.description or tag_list %}
       <div class="pod-video-description">
         {{ video.description|safe }}
       </div>
-      {% if video.tags %}
-        <p class="tag-list">{% trans 'Tags:' %}
-          {% for tag in video.tags.all %}
-            <a href="{% url 'videos:videos' %}?tag={{ tag.slug }}"
+      {% if tag_list %}
+        <p>{% trans 'Tags:' %}
+          {% for tag in tag_list %}
+            <a href="{% url 'videos:videos' %}?tag={{ tag }}"
               {% if request.GET.is_iframe %} target="_blank" {% endif %}
               class="btn btn-link btn-sm"
               title="{% blocktrans with video_tag=tag %}Show video list having tag “{{ video_tag }}”{% endblocktrans %}" data-bs-toggle="tooltip" data-bs-placement="bottom">
@@ -170,13 +174,10 @@
         <span class="pod-meta-title">{% trans 'Speaker(s):' %}</span>
         <div>
           <ul>
-            {% get_video_speaker_grouped video as grouped_speakers %}
-            {% for speaker, jobs in grouped_speakers.items %}
+            {% get_video_speaker video as speaker_in_video %}
+            {% for speaker in speaker_in_video %}
               <li>
-                <strong>{{ speaker.firstname }} {{ speaker.lastname }} </strong>
-                {% for job in jobs %}
-                  <em>{{ job }}</em>{% if not forloop.last %}, {% endif %}
-                {% endfor %}
+                {{ speaker.job.speaker.firstname }} {{ speaker.job.speaker.lastname }} ({{ speaker.job.title }})
               </li>
             {% endfor %}
           </ul>

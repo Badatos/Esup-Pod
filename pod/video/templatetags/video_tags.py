@@ -3,10 +3,8 @@
 from django import template
 from django.utils.text import capfirst
 from django.urls import reverse
-
-# from django.contrib.sites.shortcuts import get_current_site
-# from django.template import TemplateSyntaxError
-
+from django.contrib.sites.shortcuts import get_current_site
+from django.template import TemplateSyntaxError
 # from django.apps.registry import apps
 from django.utils.translation import gettext_lazy as _
 
@@ -35,7 +33,7 @@ def get_marker_time_for_user(video: Video, user: User):
 
 
 @register.simple_tag(name="get_percent_marker_for_user")
-def get_percent_marker_for_user(video: Video, user: User) -> int:
+def get_percent_marker_for_user(video: Video, user: User):
     """Tag to get the percent time of the video viewed by the authenticated user."""
     if video.duration and video.duration != 0:
         return int((video.get_marker_time_for_user(user) / video.duration) * 100)
@@ -44,7 +42,7 @@ def get_percent_marker_for_user(video: Video, user: User) -> int:
 
 
 @register.filter(name="file_exists")
-def file_exists(filepath) -> bool:
+def file_exists(filepath):
     return check_file(filepath.path)
 
 
@@ -61,7 +59,7 @@ def file_date_modified(filepath):
 
 
 @register.simple_tag
-def get_app_link(video, app) -> str:
+def get_app_link(video, app):
     mod = importlib.import_module("pod.%s.models" % app)
     if hasattr(mod, capfirst(app)):
         video_app = eval(
@@ -152,13 +150,9 @@ def get_video_infos(video):
         },
     }
 
-
 """
-No more used functions.
-To Delete in 4.0.1
-
 class getTagsForModelNode(TagsForModelNode):
-    def __init__(self, model, context_var, counts) -> None:
+    def __init__(self, model, context_var, counts):
         super(getTagsForModelNode, self).__init__(model, context_var, counts)
 
     def render(self, context):
@@ -223,10 +217,10 @@ def do_tags_for_model(parser, token):
         return getTagsForModelNode(bits[1], bits[3], counts=False)
     else:
         return getTagsForModelNode(bits[1], bits[3], counts=True)
+"""
 
-
-def do_tag_cloud_for_model(parser, token) -> None:
-    ###
+def do_tag_cloud_for_model(parser, token):
+    """
     Retrieve a list of `Tag` objects with tag cloud attributes set.
 
     Retriev tags for a given model,
@@ -263,7 +257,7 @@ def do_tag_cloud_for_model(parser, token) -> None:
        {% tag_cloud_for_model products.Widget as widget_tags
                    with steps=9 min_count=3 distribution=log %}
 
-    ###
+    """
     bits = token.contents.split()
     len_bits = len(bits)
     if len_bits != 4 and len_bits not in range(6, 9):
@@ -344,6 +338,6 @@ def update_kwargs_from_bits(kwargs, name, value, bits):
             )
     return kwargs
 
-register.tag("tags_for_model", do_tags_for_model)
-register.tag("tag_cloud_for_model", do_tag_cloud_for_model)
-"""
+
+# register.tag("tags_for_model", do_tags_for_model)
+# register.tag("tag_cloud_for_model", do_tag_cloud_for_model)

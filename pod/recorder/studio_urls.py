@@ -1,6 +1,6 @@
 """Opencast Studio urls for Esup-Pod Integration."""
 
-from django.urls import path, re_path
+from django.urls import re_path
 from .views import studio_pod, studio_static, studio_root_file
 from .views import ingest_createMediaPackage, ingest_addDCCatalog
 from .views import ingest_addAttachment, ingest_addTrack
@@ -9,13 +9,13 @@ from .views import presenter_post, settings_toml, info_me_json
 
 app_name = "recorder"
 urlpatterns = [
-    path(
-        "",
+    re_path(
+        r"^$",
         studio_pod,
         name="studio_pod",
     ),
-    path(
-        "presenter_post",
+    re_path(
+        r"^presenter_post$",
         presenter_post,
         name="presenter_post",
     ),
@@ -39,33 +39,33 @@ urlpatterns = [
         studio_root_file,
         name="studio_root_file",
     ),
-    path(
-        "ingest/createMediaPackage",
+    re_path(
+        r"^ingest/createMediaPackage$",
         ingest_createMediaPackage,
         name="ingest_createMediaPackage",
     ),
-    path(
-        "ingest/addDCCatalog",
+    re_path(
+        r"^ingest/addDCCatalog$",
         ingest_addDCCatalog,
         name="ingest_addDCCatalog",
     ),
-    path(
-        "ingest/addAttachment",
+    re_path(
+        r"^ingest/addAttachment$",
         ingest_addAttachment,
         name="ingest_addAttachment",
     ),
-    path(
-        "ingest/addTrack",
+    re_path(
+        r"^ingest/addTrack$",
         ingest_addTrack,
         name="ingest_addTrack",
     ),
-    path(
-        "ingest/addCatalog",
+    re_path(
+        r"^ingest/addCatalog$",
         ingest_addCatalog,
         name="ingest_addCatalog",
     ),
-    path(
-        "ingest/ingest",
+    re_path(
+        r"^ingest/ingest$",
         ingest_ingest,
         name="ingest_ingest",
     ),

@@ -4,6 +4,7 @@ import os
 import re
 import time
 import uuid
+from typing import Optional
 import unicodedata
 import json
 import logging
@@ -23,7 +24,6 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.templatetags.static import static
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete, post_delete
-
 # from tagging.models import Tag
 from tagulous.models import TagField
 from datetime import date
@@ -37,7 +37,6 @@ from django.db.models.signals import pre_save
 from pod.main.models import AdditionalChannelTab
 import importlib
 from django.contrib.auth.hashers import make_password
-from pod.main.context_processors import WEBTV_MODE
 
 from sorl.thumbnail import get_thumbnail
 from pod.authentication.models import AccessGroup
@@ -263,9 +262,9 @@ def get_storage_path_video(instance, filename) -> str:
         return os.path.join(
             VIDEOS_DIR,
             instance.owner.owner.hashkey,
-            os.path.dirname(fname),
-            "%s.%s"
+            "%s/%s.%s"
             % (
+                os.path.dirname(fname),
                 slugify(os.path.basename(fname)),
                 extension,
             ),
@@ -524,9 +523,7 @@ class Theme(models.Model):
         children = [self]
         try:
             child_list = self.children.all()
-        except ValueError:
-            # ValueError: 'Theme' instance needs to have a
-            # primary key value before this relationship can be used.
+        except AttributeError:
             return children
         for child in child_list:
             children.extend(child.get_all_children_flat())
@@ -687,8 +684,6 @@ class Video(models.Model):
         upload_to=get_storage_path_video,
         max_length=255,
         help_text=_("You can send an audio or video file."),
-        null=WEBTV_MODE,
-        blank=WEBTV_MODE,
     )
     title = models.CharField(
         _("Title"),
@@ -767,7 +762,6 @@ class Video(models.Model):
             "Separate tags with spaces, "
             "enclose the tags consist of several words in quotation marks."
         ),
-        blank=True,
         verbose_name=_("Tags"),
     )
     discipline = models.ManyToManyField(
@@ -836,13 +830,6 @@ class Video(models.Model):
         _("password"),
         help_text=_("Viewing this video will not be possible without this password."),
         max_length=50,
-        blank=True,
-        null=True,
-    )
-    order = models.PositiveSmallIntegerField(
-        _("order"),
-        help_text=_("Order videos in channels or themes."),
-        default=1,
         blank=True,
         null=True,
     )
@@ -1013,31 +1000,26 @@ class Video(models.Model):
         """
         return 360 if self.is_video else 244
 
-    def get_thumbnail_url(self, size="x720") -> str:
-        """Get a thumbnail url for the video, with defined max size."""
+    def get_thumbnail_url(self) -> str:
+        """Get a thumbnail url for the video."""
         request = None
-        # Initialize default thumbnail URL
-        thumbnail_url = "".join(
-            [
-                "//",
-                get_current_site(request).domain,
-                static(DEFAULT_THUMBNAIL),
-            ]
-        )
         if self.thumbnail and self.thumbnail.file_exist():
-            # Do not serve thumbnail url directly, as it can lead to the video URL
-            # Handle exception to avoid sending an error email
-            try:
-                im = get_thumbnail(self.thumbnail.file, size, crop="center", quality=80)
-                thumbnail_url = im.url
-            except Exception as e:
-                logger.error(
-                    "An error occured during get_thumbnail_url"
-                    " for video %s: %s" % (self.id, e)
-                )
-            return thumbnail_url
+            thumbnail_url = "".join(
+                [
+                    "//",
+                    get_current_site(request).domain,
+                    self.thumbnail.file.url,
+                ]
+            )
         else:
-            return thumbnail_url
+            thumbnail_url = "".join(
+                [
+                    "//",
+                    get_current_site(request).domain,
+                    static(DEFAULT_THUMBNAIL),
+                ]
+            )
+        return thumbnail_url
 
     @property
     def get_thumbnail_admin(self):
@@ -1045,14 +1027,8 @@ class Video(models.Model):
         # fix title for xml description
         title = re.sub(r"[\x00-\x08\x0B-\x0C\x0E-\x1F]", "", self.title)
         if self.thumbnail and self.thumbnail.file_exist():
-            # Handle exception to avoid sending an error email
-            try:
-                im = get_thumbnail(
-                    self.thumbnail.file, "100x100", crop="center", quality=72
-                )
-                thumbnail_url = im.url
-            except Exception:
-                thumbnail_url = static(DEFAULT_THUMBNAIL)
+            im = get_thumbnail(self.thumbnail.file, "100x100", crop="center", quality=72)
+            thumbnail_url = im.url
             # <img src="{{ im.url }}" width="{{ im.width }}"
             # height="{{ im.height }}" loading="lazy">
         else:
@@ -1072,12 +1048,8 @@ class Video(models.Model):
         """Return thumbnail image card of current video."""
         thumbnail_url = ""
         if self.thumbnail and self.thumbnail.file_exist():
-            # Handle exception to avoid sending an error email
-            try:
-                im = get_thumbnail(self.thumbnail.file, "x170", crop="center", quality=72)
-                thumbnail_url = im.url
-            except Exception:
-                thumbnail_url = static(DEFAULT_THUMBNAIL)
+            im = get_thumbnail(self.thumbnail.file, "x170", crop="center", quality=72)
+            thumbnail_url = im.url
             # <img src="{{ im.url }}" width="{{ im.width }}"
             # height="{{ im.height }}" loading="lazy">
         else:
@@ -1143,7 +1115,7 @@ class Video(models.Model):
                     )
         return version
 
-    def get_default_version_link(self, slug_private: str = None):
+    def get_default_version_link(self, slug_private: str = None) -> Optional[str]:
         """
         Get link of the version of a video.
 
@@ -1300,7 +1272,15 @@ class Video(models.Model):
                 "description": "%s" % self.description,
                 "thumbnail": "%s" % self.get_thumbnail_url(),
                 "duration": "%s" % self.duration,
-                "tags": list(self.tags.all().values("name", "slug")),
+                """
+                "tags": list(
+                    [
+                        {"name": name[0], "slug": slugify(name)}
+                        for name in Tag.objects.get_for_object(self).values_list("name")
+                    ]
+                ),
+                """
+                "tags": self.tags.all().filter(site=current_site).values("title", "slug"),
                 "type": {"title": self.type.title, "slug": self.type.slug},
                 "disciplines": list(
                     self.discipline.all()
@@ -1459,10 +1439,6 @@ class Video(models.Model):
                 name=self.slug, owner=self.owner
             )
             return videodir
-
-    def get_tag_list(self) -> str:
-        """Return a list of comma separated tag names."""
-        return ", ".join(tag.name for tag in self.tags.all())
 
     def update_additional_owners_rights(self) -> None:
         """Update folder rights for additional video owners."""

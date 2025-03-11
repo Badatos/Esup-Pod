@@ -2,7 +2,6 @@
 
 from django.db.models.functions import Lower
 import os
-import json
 import re
 import shutil
 from math import ceil
@@ -11,10 +10,13 @@ from django.urls import reverse
 from django.conf import settings
 from django.http import JsonResponse
 from django.db.models import Q
+from django.template.defaultfilters import slugify
 from django.utils.translation import gettext_lazy as _
 
 from .models import Video
 
+
+DEBUG = getattr(settings, "DEBUG", True)
 
 TEMPLATE_VISIBLE_SETTINGS = getattr(
     settings,
@@ -198,15 +200,6 @@ def get_videos(
     return JsonResponse(response, safe=False)
 
 
-def get_tag_cloud() -> list:
-    """Get only tags with weight between TAGULOUS_WEIGHT_MIN and TAGULOUS_WEIGHT_MAX."""
-    # Convert tag cloud to list of dict, so it can be stored in CACHE
-    tags = []
-    for tag in Video.tags.tag_model.objects.weight():
-        tags.append({"name": tag.name, "weight": tag.weight, "slug": tag.slug})
-    return tags
-
-
 def sort_videos_list(videos_list: list, sort_field: str, sort_direction: str = ""):
     """Return videos list sorted by sort_field.
 
@@ -235,7 +228,6 @@ def sort_videos_list(videos_list: list, sort_field: str, sort_direction: str = "
         "type",
         "viewcount",
         "rank",
-        "order",
     }:
         if sort_field in {"title", "title_fr", "title_en"}:
             sort_field = Lower(sort_field)
@@ -278,7 +270,25 @@ def get_storage_path_video(instance, filename) -> str:
 
     Instance needs to implement owner
     """
-    Video.get_storage_path_video(instance, filename)
+    fname, dot, extension = filename.rpartition(".")
+    try:
+        fname.index("/")
+        return os.path.join(
+            VIDEOS_DIR,
+            instance.owner.owner.hashkey,
+            "%s/%s.%s"
+            % (
+                os.path.dirname(fname),
+                slugify(os.path.basename(fname)),
+                extension,
+            ),
+        )
+    except ValueError:
+        return os.path.join(
+            VIDEOS_DIR,
+            instance.owner.owner.hashkey,
+            "%s.%s" % (slugify(fname), extension),
+        )
 
 
 def verify_field_length(field, field_name: str = "title", max_length: int = 100) -> list:
@@ -288,52 +298,6 @@ def verify_field_length(field, field_name: str = "title", max_length: int = 100)
         msg.append(_("Please enter a title."))
     elif len(field) < 2 or len(field) > max_length:
         msg.append(
-            _(
-                "Please enter a %(field_name)s from 2 to %(max_length)s characters."
-                % {"field_name": field_name, "max_length": max_length}
-            )
+            _("Please enter a %s from 2 to %s characters." % (field_name, max_length))
         )
     return msg
-
-
-def has_audio(video):
-    """
-    Checks if a video contains an audio track.
-
-    Args:
-        video (:class:`pod.video.models`): The video object.
-
-    Returns:
-        bool: True if the video has an audio track, False otherwise.
-    """
-    try:
-        # Get the path of the video file
-        video_path = video.video.path
-
-        # Build the path to the output directory
-        output_dir = os.path.join(os.path.dirname(video_path), f"{video.id:04d}")
-
-        # Path to the info_video.json file
-        info_file = os.path.join(output_dir, "info_video.json")
-
-        # Read the JSON file
-        with open(info_file, "r", encoding="utf-8") as json_file:
-            info_video = json.load(json_file)
-
-        # Check if the "list_audio_track" key exists and the list is not empty
-        if len(info_video["list_audio_track"]) > 0:
-            return True
-        else:
-            return False
-
-    except FileNotFoundError:
-        print("Error: info_video.json file not found.")
-    except json.JSONDecodeError:
-        print("Error: Malformed JSON file.")
-    except KeyError:
-        print("Error: 'list_audio_track' key missing in JSON file.")
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-
-    # Default to True if an error occurs
-    return True

@@ -5,8 +5,8 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+from js_asset import static
 from sorl.thumbnail import get_thumbnail
-from django.templatetags.static import static
 
 from pod.live.forms import BuildingAdminForm, EventAdminForm, BroadcasterAdminForm
 from pod.live.models import (
@@ -26,12 +26,10 @@ DEFAULT_EVENT_THUMBNAIL = getattr(
 USE_PODFILE = getattr(settings, "USE_PODFILE", False)
 
 
-@admin.register(HeartBeat)
 class HeartBeatAdmin(admin.ModelAdmin):
     list_display = ("viewkey", "user", "event", "last_heartbeat")
 
 
-@admin.register(Building)
 class BuildingAdmin(admin.ModelAdmin):
     form = BuildingAdminForm
     list_display = ("name", "gmapurl")
@@ -72,7 +70,6 @@ class BuildingAdmin(admin.ModelAdmin):
         )
 
 
-@admin.register(Broadcaster)
 class BroadcasterAdmin(admin.ModelAdmin):
     form = BroadcasterAdminForm
     list_display = (
@@ -139,9 +136,11 @@ class BroadcasterAdmin(admin.ModelAdmin):
             kwargs["queryset"] = Building.objects.filter(sites=Site.objects.get_current())
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    @admin.display(description=_("QR code"))
     def qrcode(self, obj):
         return obj.qrcode
+
+    qrcode.short_description = _("QR code")
+    qrcode.allow_tags = True
 
     class Media:
         css = {
@@ -182,7 +181,6 @@ class PasswordFilter(admin.SimpleListFilter):
         return queryset
 
 
-@admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         ModelForm = super(EventAdmin, self).get_form(request, obj, **kwargs)
@@ -194,27 +192,22 @@ class EventAdmin(admin.ModelAdmin):
 
         return ModelFormMetaClass
 
-    @admin.display(
-        description=_("Broadcaster"),
-        ordering="broadcaster",
-    )
     def get_broadcaster_admin(self, instance):
         return instance.broadcaster.name
 
-    @admin.display(
-        description=_("Auto start admin"),
-        boolean=True,
-        ordering="is_auto_start",
-    )
+    get_broadcaster_admin.short_description = _("Broadcaster")
+
     def is_auto_start_admin(self, instance):
         return instance.is_auto_start
+
+    is_auto_start_admin.short_description = _("Auto start admin")
+    is_auto_start_admin.boolean = True
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "video_on_hold":
             kwargs["queryset"] = Video.objects.filter(sites=Site.objects.get_current())
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    @admin.display(description=_("Thumbnails"))
     def get_thumbnail_admin(self, instance):
         if instance.thumbnail and instance.thumbnail.file_exist():
             im = get_thumbnail(
@@ -232,6 +225,7 @@ class EventAdmin(admin.ModelAdmin):
             )
         )
 
+    get_thumbnail_admin.short_description = _("Thumbnails")
     get_thumbnail_admin.list_filter = True
 
     form = EventAdminForm
@@ -284,6 +278,9 @@ class EventAdmin(admin.ModelAdmin):
     ]
     autocomplete_fields = ["video_on_hold"]
 
+    get_broadcaster_admin.admin_order_field = "broadcaster"
+    is_auto_start_admin.admin_order_field = "is_auto_start"
+
     if USE_PODFILE:
         fields.append("thumbnail")
 
@@ -303,4 +300,8 @@ class EventAdmin(admin.ModelAdmin):
         )
 
 
+admin.site.register(Building, BuildingAdmin)
+admin.site.register(Broadcaster, BroadcasterAdmin)
+admin.site.register(HeartBeat, HeartBeatAdmin)
+admin.site.register(Event, EventAdmin)
 admin.site.register(LiveTranscriptRunningTask)

@@ -1,7 +1,6 @@
 """Esup-Pod videos views."""
 
 from concurrent import futures
-import os
 
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.core.handlers.wsgi import WSGIRequest
@@ -29,12 +28,11 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db.models import Sum, Min
 
-
 # from django.contrib.auth.hashers import check_password
 
 from dateutil.parser import parse
 from pod.main.utils import is_ajax, dismiss_stored_messages, get_max_code_lvl_messages
-from pod.main.context_processors import WEBTV_MODE
+
 from pod.main.models import AdditionalChannelTab
 from pod.main.views import in_maintenance
 from pod.main.decorators import ajax_required, ajax_login_required, admin_required
@@ -56,6 +54,9 @@ from pod.video.models import ViewCount, VideoVersion
 from pod.video.models import Comment, Vote, Category
 from pod.video.models import get_transcription_choices
 from pod.video.models import UserMarkerTime, VideoAccessToken
+
+# from tagging.models import TaggedItem
+
 from pod.video.forms import VideoForm, VideoVersionForm
 from pod.video.forms import ChannelForm
 from pod.video.forms import FrontThemeForm
@@ -219,9 +220,9 @@ def get_theme_children_as_list(channel: Channel, theme_children: QuerySet) -> li
     return children
 
 
-def _regroup_videos_by_theme(  # noqa: C901
+def _regroup_videos_by_theme(
     request, videos, page, full_path, channel, theme=None
-):
+):  # noqa: C901
     """Regroup videos by theme.
 
     Args:
@@ -358,7 +359,6 @@ def paginator(videos_list, page):
 def channel(request, slug_c, slug_t=None):
     channel = get_object_or_404(Channel, slug=slug_c, site=get_current_site(request))
     videos_list = get_available_videos().filter(channel=channel)
-    videos_list = sort_videos_list(videos_list, "date_added", "on")
     channel.video_count = videos_list.count()
 
     theme = None
@@ -674,7 +674,6 @@ def dashboard(request):
     data_context["display_mode"] = display_mode
     data_context["video_list_template"] = template
     data_context["page_title"] = _("Dashboard")
-    data_context["listTheme"] = json.dumps(get_list_theme_in_form(form))
 
     return render(request, "videos/dashboard.html", data_context)
 
@@ -904,9 +903,10 @@ def get_filtered_videos_list(request, videos_list):
             Q(owner__username__in=request.GET.getlist("owner"))
             | Q(additional_owners__username__in=request.GET.getlist("owner"))
         )
-    if request.GET.getlist("tag"):
-        videos_list = videos_list.filter(tags__name__in=request.GET.getlist("tag"))
-
+    """if request.GET.getlist("tag"):
+        videos_list = TaggedItem.objects.get_union_by_model(
+            videos_list, request.GET.getlist("tag")
+        )"""
     if request.GET.getlist("cursus"):
         videos_list = videos_list.filter(cursus__in=request.GET.getlist("cursus"))
     return videos_list.distinct()
@@ -1108,6 +1108,11 @@ def video(request, slug, slug_c=None, slug_t=None, slug_private=None):
                 _("You cannot access this playlist because it is private.")
             )
     return render_video(request, id, slug_c, slug_t, slug_private, template_video, params)
+
+
+def tag_cloud(request):
+    """Get only tags with weight between TAGULOUS_WEIGHT_MIN and TAGULOUS_WEIGHT_MAX."""
+    return Video.tags.tag_model.objects.weight()
 
 
 def toggle_render_video_user_can_see_video(
@@ -1388,17 +1393,7 @@ def video_delete(request, slug=None):
         if request.method == "POST":
             form = VideoDeleteForm(request.POST)
             if form.is_valid():
-                media_root = settings.MEDIA_ROOT
-                temp_file_path = os.path.join(media_root, "temp_video.mp4")
-                with open(temp_file_path, "wb") as temp_file:
-                    temp_file.write(b"Temporary video content")
-                video.video.name = os.path.relpath(temp_file_path, media_root)
-                video.save()
                 video.delete()
-
-                if os.path.exists(temp_file_path):
-                    os.remove(temp_file_path)
-
                 messages.add_message(
                     request, messages.INFO, _("The media has been deleted.")
                 )
@@ -1425,24 +1420,12 @@ def video_is_deletable(request, video) -> bool:
         messages.add_message(request, messages.ERROR, _("You cannot delete this media."))
         raise PermissionDenied
 
-    if WEBTV_MODE:
-        if video.encoding_in_progress is True:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                _("You cannot delete a media that is being encoded."),
-            )
-            return False
-        return True
-    else:
-        if not video.encoded or video.encoding_in_progress is True:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                _("You cannot delete a media that is being encoded."),
-            )
-            return False
-        return True
+    if not video.encoded or video.encoding_in_progress is True:
+        messages.add_message(
+            request, messages.ERROR, _("You cannot delete a media that is being encoded.")
+        )
+        return False
+    return True
 
 
 @csrf_protect
@@ -1666,7 +1649,7 @@ def get_com_tree(com):
     return tree
 
 
-def can_edit_or_remove_note_or_com(request, nc, action) -> None:
+def can_edit_or_remove_note_or_com(request, nc, action):
     """
     Check if the current user can apply action to the note or comment nc.
 
@@ -1690,7 +1673,7 @@ def can_edit_or_remove_note_or_com(request, nc, action) -> None:
         raise PermissionDenied
 
 
-def can_see_note_or_com(request, nc) -> None:
+def can_see_note_or_com(request, nc):
     """
     Check if the current user can view the note or comment nc.
 
@@ -3298,7 +3281,7 @@ class PodChunkedUploadCompleteView(ChunkedUploadCompleteView):
             return False
         pass
 
-    def on_completion(self, uploaded_file, request) -> None:
+    def on_completion(self, uploaded_file, request):
         """Triggered when a chunked upload is complete."""
         edit_slug = request.POST.get("slug")
         transcript = request.POST.get("transcript", "")

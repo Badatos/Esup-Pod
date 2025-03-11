@@ -1,8 +1,7 @@
-"""Esup-Pod video search urls."""
+from django.urls import re_path
 
-from django.urls import path
 from .views import search_videos
 
 app_name = "video_search"
 
-urlpatterns = [path("", search_videos, name="search_videos")]
+urlpatterns = [re_path(r"^$", search_videos, name="search_videos")]
