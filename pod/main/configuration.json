@@ -1068,38 +1068,6 @@
                         "fr": "Configuration de l’application dressing"
                     }
                 },
-                "duplicate": {
-                    "description": {
-                        "en": [
-                            "Duplicate App to create a copy of the form of an existing video",
-                            "Set `USE_DUPLICATE` to True to activate this application."
-                        ],
-                        "fr": [
-                            "Application Duplicate pour créer une copie du formulaire d’une vidéo existante",
-                            "Mettre `USE_DUPLICATE` à True pour activer cette application."
-                        ]
-                    },
-                    "settings": {
-                        "USE_DUPLICATE": {
-                            "default_value": false,
-                            "description": {
-                                "en": [
-                                    "Activation of duplicate. Allows users to duplicate a video"
-                                ],
-                                "fr": [
-                                    "Activation de duplicate.",
-                                    "Permet aux utilisateurs de dupliquer une vidéo"
-                                ]
-                            },
-                            "pod_version_end": "",
-                            "pod_version_init": ""
-                        }
-                    },
-                    "title": {
-                        "en": "Duplicate application configuration",
-                        "fr": "Configuration de l’application duplicate"
-                    }
-                },
                 "enrichment": {
                     "description": {},
                     "settings": {},
@@ -1132,21 +1100,7 @@
                             },
                             "pod_version_end": "",
                             "pod_version_init": "3.8.0"
-                        },
-                        "REQUIRED_SPEAKER_FIRSTNAME": {
-                            "default_value": true,
-                            "description": {
-                                "en": [
-                                    "First name required in the speaker addition form"
-                                ],
-                                "fr": [
-                                    "Prénom obligatoire dans le formulaire d'ajout intervenant"
-                                ]
-                            },
-                            "pod_version_end": "",
-                            "pod_version_init": ""
                         }
-                        
                     },
                     "title": {
                         "en": "Seaker application configuration",
@@ -3714,16 +3668,17 @@
                             "pod_version_init": "3.1.0"
                         },
                         "ES_VERSION": {
-                            "default_value": 8,
+                            "default_value": 7,
                             "description": {
                                 "en": [
                                     ""
                                 ],
                                 "fr": [
                                     "Version d’ElasticSearch.",
-                                    "valeurs possibles : `8`, correspondant à la version du serveur Elasticsearch utilisé.",
+                                    "valeurs possibles 7 ou 8 correspondant à la version du serveur Elasticsearch utilisé.",
                                     "Attention, le paquet elasticsearch-py doit correspondre à la version du serveur. ",
-                                    "pour la 8, `pip3 install elasticsearch==8.16.0`.",
+                                    "Pour la 7, `pip3 install elasticsearch==7.17.7`,",
+                                    "et pour la 8, `pip3 install elasticsearch==8.8.1`.",
                                     "Voir [elasticsearch-py.readthedocs.io](https://elasticsearch-py.readthedocs.io/)",
                                     "pour plus d’information."
                                 ]
@@ -4378,109 +4333,6 @@
                             },
                             "pod_version_end": "",
                             "pod_version_init": "3.1.0"
-                        },
-                        "FFMPEG_DRESSING_OUTPUT": {
-                            "default_value": " -c:v libx264 -y -vsync 0 \"%(output)s\" ",
-                            "description": {
-                                "en": [
-                                    "Specifies the FFmpeg output encoding settings for generating the temporary dressed video file, using the H.264 codec with forced overwrite and synchronized video output."
-                                ],
-                                "fr": [
-                                    "Spécifie les paramètres d'encodage de sortie FFmpeg pour générer le fichier vidéo temporaire d'habillage, utilisant le codec H.264 avec écrasement forcé et synchronisation de la sortie vidéo."
-                                ]
-                            },
-                            "pod_version_end": "",
-                            "pod_version_init": "3.5.0"
-                        },
-                        "FFMPEG_DRESSING_INPUT": {
-                            "default_value": " -i \"%(input)s\" ",
-                            "description": {
-                                "en": [
-                                    "Defines the input file for FFmpeg processing of the intermediate dressed video."
-                                ],
-                                "fr": [
-                                    "Définit le fichier d'entrée pour le traitement FFmpeg de la vidéo intermédiaire d'habillage."
-                                ]
-                            },
-                            "pod_version_end": "",
-                            "pod_version_init": "3.5.0"
-                        },
-                        "FFMPEG_DRESSING_FILTER_COMPLEX": {
-                            "default_value": " -filter_complex \"%(filter)s\" ",
-                            "description": {
-                                "en": [
-                                    "Applies complex filter chains to the intermediate dressed video using FFmpeg."
-                                ],
-                                "fr": [
-                                    "Applique des chaînes de filtres complexes à la vidéo intermédiaire d'habillage avec FFmpeg."
-                                ]
-                            },
-                            "pod_version_end": "",
-                            "pod_version_init": "3.5.0"
-                        },
-                        "FFMPEG_DRESSING_WATERMARK": {
-                            "default_value": " [1]format=rgba,colorchannelmixer=aa=%(opacity)s[logo]; [logo][vid]scale2ref=oh*mdar:ih*0.1[logo][video2]; [video2][logo]%(position)s%(name_out)s ",
-                            "description": {
-                                "en": [
-                                    "Adds a watermark to the intermediate dressed video with customizable opacity and position."
-                                ],
-                                "fr": [
-                                    "Ajoute un filigrane à la vidéo intermédiaire d'habillage avec une opacité et une position personnalisables."
-                                ]
-                            },
-                            "pod_version_end": "",
-                            "pod_version_init": "3.5.0"
-                        },"FFMPEG_DRESSING_SCALE": {
-                            "default_value": "[%(number)s]scale=w='if(gt(a,16/9),16/9*%(height)s,-2)':h='if(gt(a,16/9),-2,%(height)s)',pad=ceil(16/9*%(height)s):%(height)s:(ow-iw)/2:(oh-ih)/2[%(name)s]",
-                            "description": {
-                                "en": [
-                                    "Rescales the intermediate dressed video to maintain a 16:9 aspect ratio with padding if necessary."
-                                ],
-                                "fr": [
-                                    "Redimensionne la vidéo intermédiaire d'habillage pour maintenir un ratio d'aspect 16:9 avec ajout de bordures si nécessaire."
-                                ]
-                            },
-                            "pod_version_end": "",
-                            "pod_version_init": "3.5.0"
-                        },
-                        "FFMPEG_DRESSING_CONCAT": {
-                            "default_value": "%(params)sconcat=n=%(number)s:v=1:a=1:unsafe=1[v][a]",
-                            "description": {
-                                "en": [
-                                    "Concatenates multiple video and audio streams into a single temporary dressed video output."
-                                ],
-                                "fr": [
-                                    "Concatène plusieurs flux vidéo et audio en une seule sortie de vidéo temporaire d'habillage."
-                                ]
-                            },
-                            "pod_version_end": "",
-                            "pod_version_init": "3.5.0"
-                        },
-                        "FFMPEG_DRESSING_SILENT": {
-                            "default_value": " -f lavfi -t %(duration)s -i anullsrc=r=44100:cl=stereo",
-                            "description": {
-                                "en": [
-                                    "Generates silent audio of specified duration for the temporary dressed video."
-                                ],
-                                "fr": [
-                                    "Génère un audio silencieux d'une durée spécifiée pour la vidéo temporaire d'habillage."
-                                ]
-                            },
-                            "pod_version_end": "",
-                            "pod_version_init": "4.0.0"
-                        },
-                        "FFMPEG_DRESSING_AUDIO": {
-                            "default_value": "[%(param_in)s]anull[%(param_out)s]",
-                            "description": {
-                                "en": [
-                                    "Processes audio without modifications for inclusion in the temporary dressed video."
-                                ],
-                                "fr": [
-                                    "Traite l'audio sans modifications pour l'inclure dans la vidéo temporaire d'habillage."
-                                ]
-                            },
-                            "pod_version_end": "",
-                            "pod_version_init": "4.0.0"
                         }
                     },
                     "title": {
@@ -5690,7 +5542,7 @@
             },
             "settings": {
                 "CAS": {
-                    "default_value": "1.5.3",
+                    "default_value": "1.5.2",
                     "description": {
                         "en": "",
                         "fr": [
@@ -5702,7 +5554,7 @@
                     "pod_version_init": "3.1"
                 },
                 "ModelTranslation": {
-                    "default_value": "0.19.11",
+                    "default_value": "0.18.7",
                     "description": {
                         "en": "",
                         "fr": [
@@ -5715,7 +5567,7 @@
                     "pod_version_init": "3.1"
                 },
                 "captcha": {
-                    "default_value": "0.6.0",
+                    "default_value": "0.5.17",
                     "description": {
                         "en": "",
                         "fr": [
@@ -5748,9 +5600,8 @@
                             "You should consider strongly switching to a different editor."
                         ],
                         "fr": [
-                            "ATTENTION. django-ckeditor integre la version gratuite de CKEditor 4.22.1,",
-                            "qui n'est plus prise en charge et qui présente des problèmes de sécurité non résolus,",
-                            "voir par exemple https://ckeditor.com/cke4/release/CKEditor-4.24.0-LTS."
+                            "Application permettant d’ajouter un éditeur CKEditor dans certains champs",
+                            "[django-ckeditor.readthedocs.io](https://django-ckeditor.readthedocs.io/en/latest/#installation)"
                         ]
                     },
                     "pod_version_end": "4.0.0",
@@ -5769,7 +5620,7 @@
                     "pod_version_init": "3.1"
                 },
                 "honeypot": {
-                    "default_value": "1.2.1",
+                    "default_value": "1.0.3",
                     "description": {
                         "en": "",
                         "fr": [
@@ -5782,7 +5633,7 @@
                     "pod_version_init": "3.1"
                 },
                 "mozilla_django_oidc": {
-                    "default_value": "4.0.1",
+                    "default_value": "3.0.0",
                     "description": {
                         "en": "",
                         "fr": [
@@ -5794,7 +5645,7 @@
                     "pod_version_init": "3.1"
                 },
                 "pwa": {
-                    "default_value": "2.0.1",
+                    "default_value": "1.1.0",
                     "description": {
                         "en": "",
                         "fr": [
@@ -5826,11 +5677,11 @@
                     "pod_version_init": "3.4"
                 },
                 "rest_framework": {
-                    "default_value": "3.15.2",
+                    "default_value": "3.14.0",
                     "description": {
                         "en": "",
                         "fr": [
-                            "mise en place de l’API rest pour l’application",
+                            "version 3.14.0 : mise en place de l’API rest pour l’application",
                             "[django-rest-framework.org](https://www.django-rest-framework.org/)"
                         ]
                     },
@@ -5850,7 +5701,7 @@
                     "pod_version_init": "3.1"
                 },
                 "sorl.thumbnail": {
-                    "default_value": "12.11.0",
+                    "default_value": "12.9.0",
                     "description": {
                         "en": "",
                         "fr": [
@@ -5870,28 +5721,13 @@
                             "[django-tagging.readthedocs.io](https://django-tagging.readthedocs.io/en/develop/#settings)"
                         ]
                     },
-                    "pod_version_end": "4.0.0",
-                    "pod_version_init": "3.1"
-                },
-                "tagulous": {
-                    "default_value": "2.1.0",
-                    "description": {
-                        "en": [
-                            "Managing keywords associated with a Django object. ",
-                            "[django-tagulous.readthedocs.io](https://django-tagulous.readthedocs.io)"
-                        ],
-                        "fr": [
-                            "Gestion des mots-clés associés à un objet Django. ",
-                            "[django-tagulous.readthedocs.io](https://django-tagulous.readthedocs.io)"
-                        ]
-                    },
                     "pod_version_end": "",
-                    "pod_version_init": "4.0.0"
+                    "pod_version_init": "3.1"
                 }
             },
             "title": {
-                "en": "General information",
-                "fr": "Informations générales"
+                "en": "",
+                "fr": "Information générale"
             }
         }
     }
