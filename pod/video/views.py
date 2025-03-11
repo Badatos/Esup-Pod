@@ -217,9 +217,9 @@ def get_theme_children_as_list(channel: Channel, theme_children: QuerySet) -> li
     return children
 
 
-def _regroup_videos_by_theme(
+def _regroup_videos_by_theme(  # noqa: C901
     request, videos, page, full_path, channel, theme=None
-):  # noqa: C901
+):
     """Regroup videos by theme.
 
     Args:
@@ -356,6 +356,7 @@ def paginator(videos_list, page):
 def channel(request, slug_c, slug_t=None):
     channel = get_object_or_404(Channel, slug=slug_c, site=get_current_site(request))
     videos_list = get_available_videos().filter(channel=channel)
+    videos_list = sort_videos_list(videos_list, "date_added", "on")
     channel.video_count = videos_list.count()
 
     theme = None
@@ -671,6 +672,7 @@ def dashboard(request):
     data_context["display_mode"] = display_mode
     data_context["video_list_template"] = template
     data_context["page_title"] = _("Dashboard")
+    data_context["listTheme"] = json.dumps(get_list_theme_in_form(form))
 
     return render(request, "videos/dashboard.html", data_context)
 
