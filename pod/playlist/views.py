@@ -46,7 +46,6 @@ import json
 import hashlib
 from typing import List
 
-
 TEMPLATE_VISIBLE_SETTINGS = getattr(
     settings,
     "TEMPLATE_VISIBLE_SETTINGS",

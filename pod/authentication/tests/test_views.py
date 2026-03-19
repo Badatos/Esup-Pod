@@ -29,10 +29,8 @@ class authenticationViewsTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-        print(
-            "   --->  test_authentication_login_gateway \
-            of authenticationViewsTestCase: OK!"
-        )
+        print("   --->  test_authentication_login_gateway \
+            of authenticationViewsTestCase: OK!")
 
     def test_authentication_login(self) -> None:
         """Test authentication login page."""
@@ -50,10 +48,8 @@ class authenticationViewsTestCase(TestCase):
         response = self.client.get(login_url)
         self.assertRedirects(response, "/accounts/login/?next=/")
 
-        print(
-            "   --->  test_authentication_login \
-            of authenticationViewsTestCase: OK!"
-        )
+        print("   --->  test_authentication_login \
+            of authenticationViewsTestCase: OK!")
 
     def test_authentication_logout(self) -> None:
         self.client = Client()
@@ -61,10 +57,8 @@ class authenticationViewsTestCase(TestCase):
         response = self.client.get("/authentication_logout/")
         self.assertRedirects(response, "/accounts/logout/?next=/", target_status_code=302)
 
-        print(
-            "   --->  test_authentication_logout \
-            of authenticationViewsTestCase: OK!"
-        )
+        print("   --->  test_authentication_logout \
+            of authenticationViewsTestCase: OK!")
 
     def test_userpicture(self):
         self.client = Client()

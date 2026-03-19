@@ -14,7 +14,6 @@ import os
 import mimetypes
 from ckeditor.fields import RichTextField
 
-
 FILES_DIR = getattr(settings, "FILES_DIR", "files")
 
 

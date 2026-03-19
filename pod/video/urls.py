@@ -39,7 +39,6 @@ from .views import (
     video_edit_access_tokens,
 )
 
-
 app_name = "video"
 
 urlpatterns = [
